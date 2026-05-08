@@ -135,18 +135,7 @@ pytest -q
 - 城市值规范（中文城市名或 `unknown`）
 - 输出文件可生成
 
-## 11. GitHub 提交建议
-本仓库已清理运行产物，仅保留源码和必要示例数据。  
-建议提交流程：
 
-```bash
-git init
-git add .
-git commit -m "feat: DataClean-Agent initial release"
-git branch -M main
-git remote add origin <你的仓库地址>
-git push -u origin main
-```
 
 ## 12. 演示脚本
 可直接使用：
