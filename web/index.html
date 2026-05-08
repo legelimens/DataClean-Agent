@@ -1,0 +1,613 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>DataClean-Agent 网页演示端</title>
+  <style>
+    :root {
+      --bg: #f5f8ff;
+      --panel: #ffffff;
+      --line: #dbe4ff;
+      --text: #172554;
+      --muted: #64748b;
+      --primary: #2563eb;
+      --success: #059669;
+      --danger: #dc2626;
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: "Microsoft YaHei", "PingFang SC", "Noto Sans SC", sans-serif;
+      color: var(--text);
+      background: radial-gradient(circle at top right, #dbeafe 0, var(--bg) 45%);
+    }
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      padding: 18px;
+    }
+    .hero {
+      border: 1px solid var(--line);
+      border-radius: 16px;
+      background: var(--panel);
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+    .hero h1 {
+      margin: 0;
+      color: var(--primary);
+      font-size: 28px;
+    }
+    .hero p {
+      margin: 8px 0 0;
+      color: var(--muted);
+    }
+    .layout {
+      display: grid;
+      grid-template-columns: 380px 1fr;
+      gap: 14px;
+    }
+    .panel {
+      border: 1px solid var(--line);
+      border-radius: 14px;
+      background: var(--panel);
+      padding: 14px;
+    }
+    .panel h2 {
+      font-size: 18px;
+      margin: 0 0 10px;
+    }
+    .label {
+      display: block;
+      font-size: 13px;
+      color: var(--muted);
+      margin: 10px 0 6px;
+    }
+    input[type="text"], input[type="password"], textarea {
+      width: 100%;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 9px 10px;
+      font-size: 14px;
+      outline: none;
+    }
+    textarea {
+      min-height: 180px;
+      resize: vertical;
+      font-family: Consolas, "Courier New", monospace;
+    }
+    .btn {
+      border: none;
+      border-radius: 10px;
+      padding: 10px 14px;
+      font-size: 14px;
+      cursor: pointer;
+      color: #fff;
+      background: var(--primary);
+    }
+    .btn:disabled {
+      background: #93c5fd;
+      cursor: not-allowed;
+    }
+    .btn-secondary {
+      background: #334155;
+    }
+    .status-line {
+      margin-top: 10px;
+      font-size: 13px;
+      color: var(--muted);
+      min-height: 20px;
+    }
+    .row {
+      display: flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+    .tag {
+      display: inline-block;
+      border-radius: 999px;
+      padding: 2px 8px;
+      font-size: 12px;
+      color: #fff;
+      background: #64748b;
+    }
+    .tag.done { background: var(--success); }
+    .tag.error { background: var(--danger); }
+    .tag.running { background: #0369a1; }
+    .metrics {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .metric {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      padding: 10px;
+      background: #f8fbff;
+    }
+    .metric .k {
+      color: var(--muted);
+      font-size: 12px;
+    }
+    .metric .v {
+      font-size: 22px;
+      font-weight: 700;
+      margin-top: 4px;
+    }
+    .log-box {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #0f172a;
+      color: #e2e8f0;
+      padding: 10px;
+      font-family: Consolas, "Courier New", monospace;
+      font-size: 12px;
+      height: 250px;
+      overflow-y: auto;
+      white-space: pre-wrap;
+    }
+    .history-list {
+      max-height: 220px;
+      overflow-y: auto;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      background: #f8fbff;
+    }
+    .history-item {
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 8px;
+      margin-bottom: 6px;
+      background: #fff;
+    }
+    .history-item:last-child { margin-bottom: 0; }
+    .table-wrap {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      overflow: auto;
+      max-height: 460px;
+      background: #fff;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 13px;
+    }
+    th, td {
+      border: 1px solid #e2e8f0;
+      padding: 6px 8px;
+      text-align: left;
+      white-space: nowrap;
+    }
+    th {
+      position: sticky;
+      top: 0;
+      background: #f1f5f9;
+      z-index: 2;
+    }
+    .result-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      margin-top: 10px;
+    }
+    .download-links a {
+      margin-right: 8px;
+      font-size: 13px;
+    }
+    img.chart {
+      width: 100%;
+      max-height: 320px;
+      object-fit: contain;
+      display: block;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #fff;
+    }
+    @media (max-width: 1100px) {
+      .layout { grid-template-columns: 1fr; }
+      .metrics { grid-template-columns: repeat(2, 1fr); }
+      .result-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <section class="hero">
+      <h1>DataClean-Agent 网页演示端</h1>
+      <p>上传或粘贴订单 CSV，自动完成数据检测、清洗、验证、报告生成与结果下载。</p>
+    </section>
+
+    <section class="layout">
+      <div class="panel">
+        <h2>输入与参数</h2>
+
+        <label class="label">CSV 上传（与下方粘贴二选一）</label>
+        <input id="csvFile" type="file" accept=".csv" />
+
+        <label class="label">或粘贴 CSV 文本（第一行必须是表头）</label>
+        <textarea id="csvText" placeholder="order_id,user_id,name,phone,city,order_date,amount,product,age,status"></textarea>
+
+        <label class="label">LLM 增强策略</label>
+        <div class="row">
+          <input id="enableLlm" type="checkbox" />
+          <span style="font-size:13px;color:var(--muted)">启用 API 增强（失败自动回退规则）</span>
+        </div>
+
+        <label class="label">API 提供方</label>
+        <select id="provider" style="width:100%;border:1px solid var(--line);border-radius:10px;padding:9px 10px;font-size:14px">
+          <option value="auto" selected>自动识别（推荐）</option>
+          <option value="qwen">Qwen（千问）</option>
+          <option value="openai">OpenAI / Responses 兼容</option>
+        </select>
+
+        <label class="label">模型名</label>
+        <input id="modelName" type="text" value="gpt-4.1-mini" />
+
+        <label class="label">API Key（可留空，优先环境变量）</label>
+        <input id="apiKey" type="password" placeholder="sk-..." />
+
+        <label class="label">API URL（可留空使用默认）</label>
+        <input id="apiUrl" type="text" value="https://api.openai.com/v1/responses" />
+
+        <label class="label">字段映射 JSON（可选，覆盖自动映射）</label>
+        <textarea id="mappingJson" style="min-height:110px" placeholder='例如：{"order_id":"Transaction ID","amount":"Total Spent","order_date":"Transaction Date"}'></textarea>
+
+        <div class="row" style="margin-top:12px">
+          <button class="btn btn-secondary" id="previewMappingBtn">预览映射</button>
+          <button class="btn" id="startBtn">开始清洗</button>
+          <button class="btn btn-secondary" id="refreshHistoryBtn">刷新历史</button>
+        </div>
+        <div id="statusLine" class="status-line">状态：等待执行</div>
+
+        <h2 style="margin-top:18px">最近 5 次任务</h2>
+        <div id="historyList" class="history-list"></div>
+      </div>
+
+      <div class="panel">
+        <h2>执行日志</h2>
+        <div id="logBox" class="log-box"></div>
+
+        <h2 style="margin-top:14px">质量指标摘要</h2>
+        <div id="metricsCards" class="metrics"></div>
+
+        <h2 style="margin-top:14px">字段映射结果</h2>
+        <div id="mappingBox" class="table-wrap"></div>
+
+        <div class="download-links" id="downloadLinks"></div>
+        <div style="margin-top:8px;max-width:900px">
+          <img id="chartImage" class="chart" alt="质量对比图" />
+        </div>
+
+        <div class="result-grid">
+          <div>
+            <h2 style="margin-top:14px">原始数据（全量）</h2>
+            <div id="rawTable" class="table-wrap"></div>
+          </div>
+          <div>
+            <h2 style="margin-top:14px">清洗后数据（全量）</h2>
+            <div id="cleanTable" class="table-wrap"></div>
+          </div>
+        </div>
+      </div>
+    </section>
+  </div>
+
+  <script>
+    let currentJobId = null;
+    let currentCursor = 0;
+    let pollTimer = null;
+
+    function escapeHtml(text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    }
+
+    function setStatus(text) {
+      document.getElementById("statusLine").textContent = text;
+    }
+
+    function appendLog(lines) {
+      const logBox = document.getElementById("logBox");
+      for (const line of lines) {
+        logBox.textContent += `[${line.time}] ${line.message}\n`;
+      }
+      logBox.scrollTop = logBox.scrollHeight;
+    }
+
+    function renderMetrics(summary) {
+      const cards = document.getElementById("metricsCards");
+      cards.innerHTML = "";
+
+      const items = [
+        ["质量分数", summary["质量分数"] || {}],
+        ["缺失值数量", summary["缺失值数量"] || {}],
+        ["重复行数量", summary["重复行数量"] || {}],
+        ["日期错误数量", summary["日期错误数量"] || {}],
+      ];
+
+      for (const [title, pair] of items) {
+        const before = pair["清洗前"] ?? "-";
+        const after = pair["清洗后"] ?? "-";
+        const div = document.createElement("div");
+        div.className = "metric";
+        div.innerHTML = `
+          <div class="k">${escapeHtml(title)}</div>
+          <div class="v">${escapeHtml(before)} → ${escapeHtml(after)}</div>
+        `;
+        cards.appendChild(div);
+      }
+    }
+
+    function renderTable(targetId, table) {
+      const target = document.getElementById(targetId);
+      if (!table || !table.columns || !table.rows) {
+        target.innerHTML = "<p style='padding:10px;color:#64748b'>暂无数据</p>";
+        return;
+      }
+      const head = table.columns.map((c) => `<th>${escapeHtml(c)}</th>`).join("");
+      const body = table.rows.map((row) => {
+        const tds = row.map((v) => `<td>${escapeHtml(v)}</td>`).join("");
+        return `<tr>${tds}</tr>`;
+      }).join("");
+      target.innerHTML = `<table><thead><tr>${head}</tr></thead><tbody>${body}</tbody></table>`;
+    }
+
+    function renderDownloads(downloads) {
+      const box = document.getElementById("downloadLinks");
+      if (!downloads) {
+        box.innerHTML = "";
+        return;
+      }
+      box.innerHTML = `
+        <strong>下载：</strong>
+        <a href="${downloads.clean_csv}" target="_blank">clean_orders.csv</a>
+        <a href="${downloads.metrics_json}" target="_blank">quality_metrics.json</a>
+        <a href="${downloads.report_md}" target="_blank">data_quality_report.md</a>
+        <a href="${downloads.report_html}" target="_blank">data_quality_report.html</a>
+        <a href="${downloads.dirty_csv}" target="_blank">input_original.csv</a>
+        <a href="${downloads.mapped_csv}" target="_blank">input_mapped_for_pipeline.csv</a>
+        <a href="${downloads.schema_mapping}" target="_blank">schema_mapping.json</a>
+        <a href="${downloads.zip}" target="_blank">一键下载ZIP</a>
+      `;
+      const chartImage = document.getElementById("chartImage");
+      chartImage.src = `${downloads.chart_png}?t=${Date.now()}`;
+    }
+
+    function renderSchemaMapping(schemaMapping) {
+      const box = document.getElementById("mappingBox");
+      if (!schemaMapping || !schemaMapping.final_mapping) {
+        box.innerHTML = "<p style='padding:10px;color:#64748b'>暂无字段映射信息</p>";
+        return;
+      }
+      const finalMap = schemaMapping.final_mapping || {};
+      const missing = schemaMapping.missing_standard_fields || [];
+      const rows = Object.entries(finalMap).map(([k, v]) => `<tr><td>${escapeHtml(k)}</td><td>${escapeHtml(v)}</td></tr>`).join("");
+      box.innerHTML = `
+        <table>
+          <thead><tr><th>标准字段</th><th>输入字段</th></tr></thead>
+          <tbody>${rows}</tbody>
+        </table>
+        <div style="padding:8px 10px;color:#64748b;font-size:12px">
+          未映射字段：${escapeHtml(JSON.stringify(missing))}
+        </div>
+      `;
+    }
+
+    function stopPolling() {
+      if (pollTimer) {
+        clearInterval(pollTimer);
+        pollTimer = null;
+      }
+    }
+
+    async function pollJob() {
+      if (!currentJobId) return;
+      const url = `/api/jobs/${currentJobId}?cursor=${currentCursor}`;
+      const resp = await fetch(url);
+      if (!resp.ok) return;
+      const data = await resp.json();
+      appendLog(data.logs || []);
+      currentCursor = data.next_cursor || currentCursor;
+
+      const status = data.status || "unknown";
+      setStatus(`状态：${status}${data.error ? "（" + data.error + "）" : ""}`);
+
+      if (status === "done" || status === "error") {
+        stopPolling();
+        document.getElementById("startBtn").disabled = false;
+        if (data.result) {
+          renderMetrics(data.result.summary || {});
+          renderTable("rawTable", data.result.raw_table);
+          renderTable("cleanTable", data.result.clean_table);
+          renderDownloads(data.result.downloads);
+          renderSchemaMapping(data.result.schema_mapping);
+        }
+        await loadHistory();
+      }
+    }
+
+    async function startJob() {
+      const fileInput = document.getElementById("csvFile");
+      const csvText = document.getElementById("csvText").value.trim();
+      const enableLlm = document.getElementById("enableLlm").checked;
+      const modelName = document.getElementById("modelName").value.trim() || "gpt-4.1-mini";
+      const apiKey = document.getElementById("apiKey").value.trim();
+      const apiUrl = document.getElementById("apiUrl").value.trim();
+      const mappingJson = document.getElementById("mappingJson").value.trim();
+      const provider = document.getElementById("provider").value;
+
+      if (fileInput.files.length === 0 && !csvText) {
+        setStatus("状态：请上传 CSV 或粘贴 CSV 文本");
+        return;
+      }
+      if (fileInput.files.length > 0 && csvText) {
+        setStatus("状态：上传文件与粘贴文本请二选一");
+        return;
+      }
+
+      const fd = new FormData();
+      if (fileInput.files.length > 0) {
+        fd.append("file", fileInput.files[0]);
+      } else {
+        fd.append("csv_text", csvText);
+      }
+      fd.append("enable_llm", enableLlm ? "1" : "0");
+      fd.append("model", modelName);
+      if (apiKey) fd.append("api_key", apiKey);
+      if (apiUrl) fd.append("api_url", apiUrl);
+      if (mappingJson) fd.append("column_mapping_json", mappingJson);
+      if (provider) fd.append("provider", provider);
+
+      document.getElementById("startBtn").disabled = true;
+      document.getElementById("logBox").textContent = "";
+      document.getElementById("rawTable").innerHTML = "";
+      document.getElementById("cleanTable").innerHTML = "";
+      document.getElementById("metricsCards").innerHTML = "";
+      document.getElementById("downloadLinks").innerHTML = "";
+      document.getElementById("mappingBox").innerHTML = "";
+      document.getElementById("chartImage").removeAttribute("src");
+      setStatus("状态：提交任务中...");
+
+      try {
+        const resp = await fetch("/api/jobs", { method: "POST", body: fd });
+        const data = await resp.json();
+        if (!resp.ok) {
+          throw new Error(data.detail || "创建任务失败");
+        }
+        currentJobId = data.job_id;
+        currentCursor = 0;
+        setStatus(`状态：任务已创建 ${currentJobId}`);
+        stopPolling();
+        pollTimer = setInterval(pollJob, 1000);
+        await pollJob();
+      } catch (err) {
+        setStatus(`状态：${err.message}`);
+        document.getElementById("startBtn").disabled = false;
+      }
+    }
+
+    async function previewMapping() {
+      const fileInput = document.getElementById("csvFile");
+      const csvText = document.getElementById("csvText").value.trim();
+      const mappingJson = document.getElementById("mappingJson").value.trim();
+
+      if (fileInput.files.length === 0 && !csvText) {
+        setStatus("状态：请先上传 CSV 或粘贴 CSV 文本");
+        return;
+      }
+      if (fileInput.files.length > 0 && csvText) {
+        setStatus("状态：上传文件与粘贴文本请二选一");
+        return;
+      }
+
+      const fd = new FormData();
+      if (fileInput.files.length > 0) {
+        fd.append("file", fileInput.files[0]);
+      } else {
+        fd.append("csv_text", csvText);
+      }
+      if (mappingJson) fd.append("column_mapping_json", mappingJson);
+
+      setStatus("状态：正在预览字段映射...");
+      try {
+        const resp = await fetch("/api/mapping/preview", { method: "POST", body: fd });
+        const data = await resp.json();
+        if (!resp.ok) throw new Error(data.detail || "映射预览失败");
+
+        renderSchemaMapping(data.schema_mapping);
+        setStatus("状态：映射预览完成，可直接开始清洗");
+
+        // 自动把预览结果写入映射 JSON 方便用户微调
+        if (!mappingJson) {
+          const finalMapping = data.schema_mapping?.final_mapping || {};
+          document.getElementById("mappingJson").value = JSON.stringify(finalMapping, null, 2);
+        }
+      } catch (err) {
+        setStatus(`状态：${err.message}`);
+      }
+    }
+
+    function statusTag(status) {
+      const cls = status === "done" ? "done" : status === "error" ? "error" : "running";
+      return `<span class="tag ${cls}">${escapeHtml(status)}</span>`;
+    }
+
+    async function loadHistory() {
+      const resp = await fetch("/api/history");
+      const data = await resp.json();
+      const list = document.getElementById("historyList");
+      const jobs = data.jobs || [];
+      if (jobs.length === 0) {
+        list.innerHTML = "<div style='color:#64748b'>暂无历史任务</div>";
+        return;
+      }
+      list.innerHTML = jobs.map((job) => {
+        const score = job.before_score != null && job.after_score != null
+          ? `${job.before_score} → ${job.after_score}`
+          : "-";
+        return `
+          <div class="history-item">
+            <div class="row" style="justify-content:space-between">
+              <strong>${escapeHtml(job.job_id)}</strong>
+              ${statusTag(job.status)}
+            </div>
+            <div style="font-size:12px;color:#64748b;margin-top:4px">创建时间：${escapeHtml(job.created_at || "-")}</div>
+            <div style="font-size:12px;color:#64748b">质量分：${escapeHtml(score)}</div>
+            <div style="margin-top:6px">
+              <button class="btn btn-secondary" onclick="openHistoryJob('${escapeHtml(job.job_id)}')">查看</button>
+            </div>
+          </div>
+        `;
+      }).join("");
+    }
+
+    async function openHistoryJob(jobId) {
+      currentJobId = jobId;
+      currentCursor = 0;
+      document.getElementById("logBox").textContent = "";
+      setStatus(`状态：查看历史任务 ${jobId}`);
+      stopPolling();
+      await pollJob();
+      const resp = await fetch(`/api/jobs/${jobId}?cursor=${currentCursor}`);
+      if (resp.ok) {
+        const data = await resp.json();
+        if (data.status === "running") {
+          pollTimer = setInterval(pollJob, 1000);
+        } else {
+          document.getElementById("startBtn").disabled = false;
+        }
+      }
+    }
+
+    document.getElementById("startBtn").addEventListener("click", startJob);
+    document.getElementById("previewMappingBtn").addEventListener("click", previewMapping);
+    document.getElementById("refreshHistoryBtn").addEventListener("click", loadHistory);
+    document.getElementById("provider").addEventListener("change", (e) => {
+      const v = e.target.value;
+      const apiUrlInput = document.getElementById("apiUrl");
+      const modelInput = document.getElementById("modelName");
+      if (v === "qwen") {
+        apiUrlInput.value = "https://dashscope.aliyuncs.com/compatible-mode/v1";
+        if (!modelInput.value || modelInput.value === "gpt-4.1-mini") {
+          modelInput.value = "qwen-plus";
+        }
+      } else if (v === "openai") {
+        apiUrlInput.value = "https://api.openai.com/v1/responses";
+        if (!modelInput.value || modelInput.value === "qwen-plus") {
+          modelInput.value = "gpt-4.1-mini";
+        }
+      }
+    });
+    loadHistory();
+  </script>
+</body>
+</html>
